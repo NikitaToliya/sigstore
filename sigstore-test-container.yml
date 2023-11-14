@@ -1,0 +1,43 @@
+name: Cosign Sign Container Test
+on: [workflow_dispatch]
+jobs:
+  Cosign-Sign-Container-Test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install ca-certificates
+        run: sudo apt-get update && sudo apt-get install ca-certificates -y
+      - name: Add self signed sigstore cert
+        run: sudo cp nginx-selfsigned.crt /usr/local/share/ca-certificates/nginx-selfsigned.crt && sudo update-ca-certificates
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.0.2
+        with:
+         cosign-release: 'v2.0.1'
+      - name: Check install!
+        run: cosign version
+      - name: Pull Rekor Public Key
+        run: curl -o rekor.pub https://34.171.57.150/rekor/api/v1/log/publicKey
+      - name: Pull Fulcio Root Cert
+        run: curl -o fulcio.root.crt https://34.171.57.150/fulcio/api/v1/rootCert
+      - name: Setup Image
+        run: |
+          IMAGE_NAME=$(uuidgen) 
+          IMAGE=ttl.sh/$IMAGE_NAME:5m
+          cosign copy alpine $IMAGE
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Sign Image
+        env:
+          SIGSTORE_REKOR_PUBLIC_KEY: "rekor.pub"
+          SIGSTORE_ROOT_FILE: "fulcio.root.crt"
+          SIGSTORE_CT_LOG_PUBLIC_KEY_FILE: "ct_pub.pem"
+        run: cosign sign --rekor-url=https://34.171.57.150/rekor --fulcio-url=https://34.171.57.150/fulcio ${{ env.IMAGE }} -y
+      - name: Verify Image
+        env:
+          SIGSTORE_REKOR_PUBLIC_KEY: "rekor.pub"
+          SIGSTORE_ROOT_FILE: "fulcio.root.crt"
+          SIGSTORE_CT_LOG_PUBLIC_KEY_FILE: "ct_pub.pem"
+        run: cosign verify --rekor-url=https://34.171.57.150/rekor --certificate-identity https://github.com/${{ github.workflow_ref }} --certificate-oidc-issuer https://token.actions.githubusercontent.com ${{ env.IMAGE }}
