@@ -52,11 +52,8 @@ jobs:
       - name: Set environment variable for cosign
         run: echo "COSIGN_NON_INTERACTIVE=true" >> $GITHUB_ENV
 
-
       - name: Sign the container image
         run: cosign sign ghcr.io/${{ github.repository }}@${{ steps.push-step.outputs.digest }}
         env:
           COSIGN_NON_INTERACTIVE: "true"
-      //- name: Sign the container image
-        //run: cosign sign --no-prompt ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}@${{ steps.push-step.outputs.digest }}
 
