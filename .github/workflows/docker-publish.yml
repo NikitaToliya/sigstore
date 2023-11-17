@@ -49,10 +49,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
-      - name: Enable Docker Content Trust
-        run: echo "DOCKER_CONTENT_TRUST=1" >> $GITHUB_ENV
-
       - name: Sign the container image
-        run: cosign sign ghcr.io/NikitaToliya/sigstore
+        run: cosign sign NikitaToliya/sigstore
 
 
