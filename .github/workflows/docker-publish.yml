@@ -53,5 +53,5 @@ jobs:
         run: echo "COSIGN_NON_INTERACTIVE=true" >> $GITHUB_ENV
 
       - name: Sign the container image
-        run: cosign sign ghcr.io/NikitaToliya/sigstore:latest
+        run: cosign sign ghcr.io/NikitaToliya/sigstore
 
