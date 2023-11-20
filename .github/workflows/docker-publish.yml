@@ -50,6 +50,6 @@ jobs:
           tags: ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
       - name: Sign the container image
-        run: cosign sign NikitaToliya/sigstore
+        run: cosign sign ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}@${{ steps.push-step.outputs.digest }} 
 
 
