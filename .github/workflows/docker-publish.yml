@@ -49,12 +49,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
-      - name: Download cosign for Windows
-        run: |
-          wget https://github.com/sigstore/cosign/releases/download/v2.0.1/cosign-windows-amd64.exe
-          chmod +x cosign-windows-amd64.exe
 
       - name: Sign the container image
-        run: |
-          ./cosign-windows-amd64.exe sign -key cosign-windows-amd64.exe-keyless.sig ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
+        run: cosign sign --tlog-upload=false ghcr.io/nikitatoliya/sigstore@sha256:cee38bb670be0116569631c13924915360fc0efc8b69e36517deec3eaddaf3ca
+
 
