@@ -4,11 +4,11 @@ on:
   schedule:
     - cron: '32 11 * * *'
   push:
-    branches: [ main ]
+    branches: [main]
     # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
+    tags: ['v*.*.*']
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -49,16 +49,12 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
+      - name: Download cosign for Windows
+        run: |
+          wget https://github.com/sigstore/cosign/releases/download/v2.0.1/cosign-windows-amd64.exe
+          chmod +x cosign-windows-amd64.exe
+
       - name: Sign the container image
         run: |
-          COSIGN_UPLOAD_TLOG=${{ env.COSIGN_UPLOAD_TLOG }}
-          if [ "$COSIGN_UPLOAD_TLOG" = "true" ]; then
-            cosign sign ghcr.io/nikitatoliya/sigstore@sha256:cee38bb670be0116569631c13924915360fc0efc8b69e36517deec3eaddaf3ca
-          else
-            cosign sign --tlog-upload=false ghcr.io/nikitatoliya/sigstore@sha256:cee38bb670be0116569631c13924915360fc0efc8b69e36517deec3eaddaf3ca
-          fi
-        env:
-           COSIGN_UPLOAD_TLOG: ${{ secrets.COSIGN_UPLOAD_TLOG }}
-
-
+          ./cosign-windows-amd64.exe sign -key cosign-windows-amd64.exe-keyless.sig ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
