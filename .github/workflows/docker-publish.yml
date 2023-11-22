@@ -50,6 +50,15 @@ jobs:
           tags: ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}:latest
 
       - name: Sign the container image
-        run: cosign sign ghcr.io/${{ env.LOWERCASE_REPOSITORY_NAME }}@${{ steps.push-step.outputs.digest }} 
+        run: |
+          COSIGN_UPLOAD_TLOG=${{ env.COSIGN_UPLOAD_TLOG }}
+          if [ "$COSIGN_UPLOAD_TLOG" = "true" ]; then
+            cosign sign ghcr.io/nikitatoliya/sigstore@sha256:cee38bb670be0116569631c13924915360fc0efc8b69e36517deec3eaddaf3ca
+          else
+            cosign sign --tlog-upload=false ghcr.io/nikitatoliya/sigstore@sha256:cee38bb670be0116569631c13924915360fc0efc8b69e36517deec3eaddaf3ca
+          fi
+        env:
+           COSIGN_UPLOAD_TLOG: ${{ secrets.COSIGN_UPLOAD_TLOG }}
+
 
 
